@@ -1,0 +1,38 @@
+{
+  "name": "@elense/file-tester",
+  "version": "1.0.0",
+  "description": "Util for less cumbersome api tests with files",
+  "main": "file-tester.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "type": "commonjs",
+  "keywords": [
+    "files",
+    "supertest",
+    "upload",
+    "api test"
+  ],
+  "author": "Radosław Landowski <radoslaw.landowski@gmail.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elense-software/file-tester.git"
+  },
+  "dependencies": {
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "bugs": {
+    "url": "https://github.com/elense-software/file-tester/issues"
+  },
+  "homepage": "https://github.com/elense-software/file-tester#readme"
+}
