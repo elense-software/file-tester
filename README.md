@@ -32,3 +32,32 @@ Effect:
 This can be modified project-wise by static field `TestFilesDirectory.globalDirectoryPathComponent`.
 
 
+
+### SpreadsheetTestFile
+
+```typescript
+it('SpreadsheetTestFile creation writes test.csv file to local filesystem', async () => {
+    const testFilePath = directory.path(`test.csv`);
+
+    const file: SpreadsheetTestFile = new SpreadsheetTestFile(
+        [
+            ["First name", "Last name", "Age", "Type"],
+            ["John", "Doe", 30, "Admin"],
+            ["Adam", "Smith", 40, "Admin"],
+            ["Rose", "Gatsby", 35, "User"]
+        ],
+        null // Indicates that this file was not loaded from the path, it was built in memory.
+    )
+
+    file.write(testFilePath)
+    expect(fs.existsSync(testFilePath)).toBe(true)
+
+    const writtenFile = SpreadsheetTestFile.get(testFilePath)
+    expect(writtenFile.data).toEqual(file.data)
+});
+```
+- Carries Test file data - array of arrays of data and an optional file path, if it resides in local filesystem.
+- Write file to local filesystem by `file.write(path)`
+- `SpreadsheetTestFile.get(path: string | Buffer): SpreadsheetTestFile` - obtain the xlsx file from provided path or Buffer.
+  
+
