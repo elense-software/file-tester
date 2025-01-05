@@ -64,6 +64,6 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
 
     constructor(
         readonly data: SpreadsheetFileData,
-        readonly path: string | null) {
+        readonly path: string | null = null) {
     }
 }

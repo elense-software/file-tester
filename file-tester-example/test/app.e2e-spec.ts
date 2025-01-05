@@ -49,11 +49,17 @@ describe('AppController (e2e)', () => {
                         ["John", "Doe", 30, "Admin"],
                         ["Adam", "Smith", 40, "Admin"],
                         ["Rose", "Gatsby", 35, "User"]
-                    ],
-                    null
+                    ]
                 )
 
                 file.write(testFilePath)
+                file.print()
+
+                const fileData: any[][] = file.data
+
+                expect(fileData[3]).toEqual(["Rose", "Gatsby", 35, "User"])
+                expect(fileData[1][2]).toEqual(30)
+                expect(fileData[3][1]).toEqual('Gatsby')
 
                 expect(fs.existsSync(testFilePath)).toBe(true)
 

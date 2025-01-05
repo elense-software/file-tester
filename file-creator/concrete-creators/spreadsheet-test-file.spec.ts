@@ -23,7 +23,7 @@ describe('SpreadsheetTestFile', () => {
         const file = new TestFilesDirectory(__dirname, 'generated-files').path('generated-file.xlsx');
 
         let fileData = [['Name', 'Last name', 'Age']];
-        const instance = new SpreadsheetTestFile(fileData, file);
+        const instance = new SpreadsheetTestFile(fileData);
         instance.write(file);
 
         const writtenFile = SpreadsheetTestFile.get(file)
