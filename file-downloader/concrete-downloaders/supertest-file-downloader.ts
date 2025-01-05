@@ -1,5 +1,7 @@
 import request from 'supertest'
 import {FileDownloader} from "../file-downloader";
+import {TestFile} from "../../file-creator/concrete-creators/test-file";
+import {SpreadsheetTestFile} from "../../file-creator/concrete-creators/spreadsheet-test-file";
 
 export interface SupertestFileDownloaderConfiguration {
     /**
@@ -25,7 +27,7 @@ export interface SupertestFileDownloaderConfiguration {
 export class SupertestFileDownloader implements FileDownloader {
     constructor(readonly configuration: SupertestFileDownloaderConfiguration) {}
 
-    async download(downloadParameters?: Partial<SupertestFileDownloaderConfiguration> | any): Promise<Buffer> {
+    async download(downloadParameters?: Partial<SupertestFileDownloaderConfiguration> | any): Promise<TestFile> {
         const mergedConfig = { ...this.configuration, ...downloadParameters }
 
         const initRequest: request.Test = request(mergedConfig.appOrBaseUrl).get(mergedConfig.endpointUrl)
@@ -38,6 +40,6 @@ export class SupertestFileDownloader implements FileDownloader {
 
         const responseBody: Buffer = await response.body
 
-        return responseBody
+        return SpreadsheetTestFile.get(responseBody)
     }
 }

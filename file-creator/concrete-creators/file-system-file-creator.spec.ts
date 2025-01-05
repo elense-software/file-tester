@@ -1,6 +1,7 @@
 import fs from 'fs'
 import {FileSystemFileCreator} from "./file-system-file-creator";
 import {SpreadsheetTypes, TestFilesDirectory} from "../file-creator";
+import {TestFile} from "./test-file";
 
 describe('FileSystemFileCreator', () => {
     let fileCreator: FileSystemFileCreator
@@ -36,20 +37,20 @@ describe('FileSystemFileCreator', () => {
                 const fileData = [['Radek', 'Landowski', 20]]
                 const headerRow = ['Name', 'Last name', 'Age']
 
-                const result: any[][] = await fileCreator.create(filePath, fileData)
+                const result: TestFile = await fileCreator.create(filePath, fileData)
 
-                expect(result).toEqual([headerRow, ...fileData])
+                expect(result.data).toEqual([headerRow, ...fileData])
             })
 
             it('writes file without header', async () => {
                 const filePath = testOutputPath.path( `test-radek-landowski-20-no-header.${extension}`)
                 const fileData = [['Radek', 'Landowski', 20]]
 
-                const result: any[][] = await new FileSystemFileCreator({
+                const result: TestFile = await new FileSystemFileCreator({
                     headerRow: null,
                 }).create(filePath, fileData)
 
-                expect(result).toEqual(fileData)
+                expect(result.data).toEqual(fileData)
             })
 
             it('writes file with header row even when data is empty', async () => {
@@ -57,9 +58,9 @@ describe('FileSystemFileCreator', () => {
                 const fileData = [[]]
                 const headerRow = ['Name', 'Last name', 'Age']
 
-                const result: any[][] = await fileCreator.create(filePath, fileData)
+                const result: TestFile = await fileCreator.create(filePath, fileData)
 
-                expect(result).toEqual([headerRow])
+                expect(result.data).toEqual([headerRow])
             })
         })
     }

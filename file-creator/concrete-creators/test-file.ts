@@ -1,0 +1,13 @@
+export type FileData = any[][];
+
+export interface TestFile<T = FileData> {
+    /**
+     * Data from the file.
+     */
+    data: T
+
+    /**
+     * Path to the file. If the file was created in memory, this will be null.
+     */
+    path: string | null
+}

@@ -37,12 +37,15 @@ describe('AppController (e2e)', () => {
 
     describeWithFolder('FileSystemFileCreator', __dirname, 'file-system-file-creator', (directory: TestFilesDirectory) => {
         it('Directory creation works properly', async () => {
+            expect(directory.directory).toEqual(__dirname + '/file-system-file-creator')
             expect(fs.existsSync(directory.directory)).toBe(true)
         });
     })
 
     it('Directory creation works properly', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-1')
+        genFiles.clear()
+        genFiles.create()
 
         expect(fs.existsSync(genFiles.directory)).toBe(true)
     });
@@ -76,14 +79,14 @@ describe('AppController (e2e)', () => {
 
         let testFilePath = genFiles.path('test.csv');
 
-        await fileCreator.create(testFilePath, [
+        const createdFile = await fileCreator.create(testFilePath, [
             ["John", "Doe", 30, "Admin"],
             ["Adam", "Smith", 40, "Admin"],
             ["Rose", "Gatsby", 35, "User"]
         ])
 
         const file = fileCreator.readFile(testFilePath)
-        console.table(file)
+        console.table(file.data)
 
         const fileUploader = new SupertestFileUploader({
             appOrBaseUrl: app.getHttpServer(),
@@ -97,7 +100,7 @@ describe('AppController (e2e)', () => {
             endpointUrl: "/download",
         })
 
-        const donwloadedBuffer = await fileDownloader.download({
+        const downloadedFile = await fileDownloader.download({
             customizeRequest(request: supertest.Test, downloadParameters: any): supertest.Test {
                 return request.query({
                     fileId: uploadedFile.responseBody.fileId
@@ -105,8 +108,7 @@ describe('AppController (e2e)', () => {
             }
         })
 
-        const downloadedFile = TestFile.get(donwloadedBuffer)
 
-        expect(file).toEqual(downloadedFile.jsonData)
+        expect(file.data).toEqual(downloadedFile.data)
     });
 });
