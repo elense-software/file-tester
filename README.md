@@ -7,6 +7,7 @@ Case - The server allows to upload files and returns unique identifier for each 
 
 ```typescript
     // _describeWithFolder_ is a wrapper for describe which injects the object which prepares folder for test files
+
     describeWithFolder(`Create file in folder, upload and download back again.`, __dirname, 'e2e-upload-download', (directory: TestFilesDirectory) => {
         it('Created file and downloaded one must have the same content', async () => {
 
@@ -51,5 +52,21 @@ Case - The server allows to upload files and returns unique identifier for each 
     })
 ```
 
+_describeWithFolder_
+
+```typescript
+export const describeWithFolder = (name: string, basePath: string, folderName: string, tests: (directory: TestFilesDirectory) => void) => {
+    const directory = new TestFilesDirectory(basePath, folderName);
+
+    describe(name, () => {
+        beforeAll(() => {
+            directory.clear()
+            directory.create()
+        });
+
+        tests(directory);
+    });
+};
+```
   
 
