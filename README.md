@@ -1,11 +1,11 @@
 # file-tester
 ##### A set of utility functions to write clean tests utilizing file system: file directories, creating files, uploading them to server and downloading
 
-### TestFilesDirectory
+## TestFilesDirectory
 
 _/file-tester-example/test/test-files-directory.spec.ts_
 ```typescript
-it('Directory contains the global path component', async () => {
+it(`Creates '_test-runtime/test-specific-folder' directory relative to __dirname`, async () => {
     const folder = new TestFilesDirectory(__dirname, 'test-specific-folder')
     // if test file resides in `/file-tester-example/test` then folder.directory contains an absolute path: /file-tester-example/test/_test-runtime/test-specific-folder
 
@@ -33,31 +33,32 @@ This can be modified project-wise by static field `TestFilesDirectory.globalDire
 
 
 
-### SpreadsheetTestFile
+## SpreadsheetTestFile
 
 ```typescript
-it('SpreadsheetTestFile creation writes test.csv file to local filesystem', async () => {
-    const testFilePath = directory.path(`test.csv`);
+    it('Define spreadsheet data, write to disk, fetch and access the data', async () => {
+        // define file content
+        const inputFile: SpreadsheetTestFile = new SpreadsheetTestFile(
+            [
+                ["First name", "Last name", "Age", "Type"],
+                ["John", "Doe", 30, "Admin"],
+                ["Adam", "Smith", 40, "Admin"],
+                ["Rose", "Gatsby", 35, "User"]
+            ]
+        )
 
-    const file: SpreadsheetTestFile = new SpreadsheetTestFile(
-        [
-            ["First name", "Last name", "Age", "Type"],
-            ["John", "Doe", 30, "Admin"],
-            ["Adam", "Smith", 40, "Admin"],
-            ["Rose", "Gatsby", 35, "User"]
-        ],
-        null // Indicates that this file was not loaded from the path, it was built in memory.
-    )
+        // use the data
+        const lastNameOfAdam = inputFile.data[2][1]
 
-    file.write(testFilePath)
-    expect(fs.existsSync(testFilePath)).toBe(true)
+        // write to local file system
+        inputFile.write( __dirname + '/test.xlsx')
 
-    const writtenFile = SpreadsheetTestFile.get(testFilePath)
-    expect(writtenFile.data).toEqual(file.data)
-});
+        // Fetch file by path
+        const writtenFile: SpreadsheetTestFile = SpreadsheetTestFile.get(__dirname + '/test.xlsx')
+
+        // compare files
+        expect(writtenFile.data).toEqual(inputFile.data)
+    });
 ```
-- Carries Test file data - array of arrays of data and an optional file path, if it resides in local filesystem.
-- Write file to local filesystem by `file.write(path)`
-- `SpreadsheetTestFile.get(path: string | Buffer): SpreadsheetTestFile` - obtain the xlsx file from provided path or Buffer.
   
 
