@@ -1,6 +1,6 @@
 {
   "name": "@elense/file-tester",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Util for less cumbersome api tests with files",
     "scripts": {
     "test": "jest",

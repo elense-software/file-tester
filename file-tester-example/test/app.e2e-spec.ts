@@ -90,6 +90,28 @@ describe('AppController (e2e)', () => {
         expect(fs.existsSync(file.path)).toBe(true)
     });
 
+    it('File creation and upload works properly', async () => {
+        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-23')
+        const testFilePath = genFiles.path('test-23.csv');
+
+        const fileCreator = new FileSystemFileCreator()
+
+        const file: TestFile = await fileCreator.create(testFilePath, [
+            ["First name", "Last name", "Age", "Type"],
+            ["John", "Doe", 30, "Admin"],
+            ["Adam", "Smith", 40, "Admin"],
+            ["Rose", "Gatsby", 35, "User"]
+        ])
+
+        const response = await new SupertestFileUploader({}).upload(file.path, {
+            appOrBaseUrl: app.getHttpServer(),
+            endpointUrl: "/upload",
+        })
+
+        expect(response.isSuccessful).toEqual(true)
+        expect(response.responseBody.fileId).toBeDefined()
+    });
+
     it('File upload and download equals the same file content', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-3')
         const testFilePath = genFiles.path('test.csv');
