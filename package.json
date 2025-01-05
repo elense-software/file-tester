@@ -4,7 +4,9 @@
   "description": "Util for less cumbersome api tests with files",
   "main": "file-tester.ts",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "dev": "npm run test && npm pack",
+    "packDry": "npm pack --dry-run"
   },
   "type": "commonjs",
   "keywords": [
@@ -27,6 +29,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
+    "npm-packlist": "^10.0.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
@@ -34,5 +37,8 @@
   "bugs": {
     "url": "https://github.com/elense-software/file-tester/issues"
   },
-  "homepage": "https://github.com/elense-software/file-tester#readme"
+  "homepage": "https://github.com/elense-software/file-tester#readme",
+  "files": [
+    "lib/**/*"
+  ]
 }
