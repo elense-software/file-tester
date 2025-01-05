@@ -43,7 +43,7 @@ describe('AppController (e2e)', () => {
             it('Standalone file creation works properly %s', async () => {
                 const testFilePath = directory.path(`test.${fileType}`);
 
-                const file: SpreadsheetTestFile = new SpreadsheetTestFile(
+                const inputFile: SpreadsheetTestFile = new SpreadsheetTestFile(
                     [
                         ["First name", "Last name", "Age", "Type"],
                         ["John", "Doe", 30, "Admin"],
@@ -51,24 +51,46 @@ describe('AppController (e2e)', () => {
                         ["Rose", "Gatsby", 35, "User"]
                     ]
                 )
+                inputFile.write(testFilePath)
 
-                file.write(testFilePath)
-                file.print()
+                const writtenFile: SpreadsheetTestFile = SpreadsheetTestFile.get(testFilePath)
 
-                const fileData: any[][] = file.data
+                expect(writtenFile.data).toEqual(inputFile.data)
+
+                const fileData: any[][] = writtenFile.data
 
                 expect(fileData[3]).toEqual(["Rose", "Gatsby", 35, "User"])
                 expect(fileData[1][2]).toEqual(30)
                 expect(fileData[3][1]).toEqual('Gatsby')
 
-                expect(fs.existsSync(testFilePath)).toBe(true)
-
-                const writtenFile = SpreadsheetTestFile.get(testFilePath)
-
-                expect(writtenFile.data).toEqual(file.data)
+                writtenFile.print()
             });
         })
     })
+
+    it('File creation works properly', async () => {
+        // define file content
+        const inputFile: SpreadsheetTestFile = new SpreadsheetTestFile(
+            [
+                ["First name", "Last name", "Age", "Type"],
+                ["John", "Doe", 30, "Admin"],
+                ["Adam", "Smith", 40, "Admin"],
+                ["Rose", "Gatsby", 35, "User"]
+            ]
+        )
+
+        // use the data
+        const lastNameOfAdam = inputFile.data[2][1]
+
+        // write to local file system
+        inputFile.write( __dirname + '/test.xlsx')
+
+        // Fetch file by path
+        const writtenFile: SpreadsheetTestFile = SpreadsheetTestFile.get(__dirname + '/test.xlsx')
+
+        // compare files
+        expect(writtenFile.data).toEqual(inputFile.data)
+    });
 
     it('Directory creation works properly', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'test-specific-folder')
@@ -131,42 +153,47 @@ describe('AppController (e2e)', () => {
         expect(response.responseBody.fileId).toBeDefined()
     });
 
-    it('File upload and download equals the same file content', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-3')
-        const testFilePath = genFiles.path('test.csv');
+    describeWithFolder(`Create file in folder, upload and download back again.`, __dirname, 'e2e-upload-download', (directory: TestFilesDirectory) => {
+        it('Created file and downloaded one must have the same content', async () => {
+            const testFilePath = directory.path('test.csv');
 
-        const fileCreator = new FileSystemFileCreator()
+            // write the file to local file system
+            const createdFile: SpreadsheetTestFile = SpreadsheetTestFile.write([
+                ["First name", "Last name", "Age", "Type"],
+                ["John", "Doe", 30, "Admin"],
+                ["Adam", "Smith", 40, "Admin"],
+                ["Rose", "Gatsby", 35, "User"]
+            ], testFilePath)
 
-        const createdFile = await fileCreator.create(testFilePath, [
-            ["First name", "Last name", "Age", "Type"],
-            ["John", "Doe", 30, "Admin"],
-            ["Adam", "Smith", 40, "Admin"],
-            ["Rose", "Gatsby", 35, "User"]
-        ])
+            // prepare uploader with common props (can be overriden at upload method)
+            const fileUploader = new SupertestFileUploader({
+                appOrBaseUrl: app.getHttpServer(),
+                endpointUrl: "/upload"
+            })
 
-        const file = fileCreator.readFile(createdFile.path)
-        file.print()
+            // upload the file, by executing http request to /upload endpoint
+            const uploadedFileResult = await fileUploader.upload(createdFile.path)
 
-        const fileUploader = new SupertestFileUploader({
-            appOrBaseUrl: app.getHttpServer(),
-            endpointUrl: "/upload"
-        })
+            // prepare downloader with common props (can be overriden at download method)
+            const fileDownloader = new SupertestFileDownloader({
+                appOrBaseUrl: app.getHttpServer(),
+                endpointUrl: "/download",
+            })
 
-        const uploadedFile = await fileUploader.upload(testFilePath)
+            // download the file, by executing http request to /download endpoint and using fileId query parameter
+            const downloadedFile = await fileDownloader.download({
+                customizeRequest(request: supertest.Test, downloadParameters: any): supertest.Test {
+                    return request.query({
+                        fileId: uploadedFileResult.responseBody.fileId
+                    });
+                }
+            })
 
-        const fileDownloader = new SupertestFileDownloader({
-            appOrBaseUrl: app.getHttpServer(),
-            endpointUrl: "/download",
-        })
+            // compare that the content of created file and downloaded file is the same
+            expect(createdFile.data).toEqual(downloadedFile.data)
+        });
 
-        const downloadedFile = await fileDownloader.download({
-            customizeRequest(request: supertest.Test, downloadParameters: any): supertest.Test {
-                return request.query({
-                    fileId: uploadedFile.responseBody.fileId
-                });
-            }
-        })
 
-        expect(file.data).toEqual(downloadedFile.data)
-    });
+    })
+
 });

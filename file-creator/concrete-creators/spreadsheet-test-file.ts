@@ -33,6 +33,17 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
         return new SpreadsheetTestFile(jsonData, filePath)
     }
 
+    static write(fileData: SpreadsheetFileData, filePath: string): SpreadsheetTestFile {
+        const file = new SpreadsheetTestFile(
+            fileData,
+            filePath
+        )
+
+        file.write(filePath)
+
+        return file
+    }
+
     write(outputPath: string): void {
         this.createOutputFolder(outputPath)
 
@@ -51,6 +62,8 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
         } else {
             XLSX.writeFileXLSX(wb, outputPath)
         }
+
+        this.path = outputPath
     }
 
     print() {
@@ -64,6 +77,6 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
 
     constructor(
         readonly data: SpreadsheetFileData,
-        readonly path: string | null = null) {
+        public path: string | null = null) {
     }
 }
