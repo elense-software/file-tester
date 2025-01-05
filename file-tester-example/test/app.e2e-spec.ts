@@ -1,42 +1,68 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
-import {FileSystemFileCreator, TestFilesDirectory} from "@elense/file-tester";
+import {Test, TestingModule} from '@nestjs/testing';
+import {INestApplication} from '@nestjs/common';
+import {AppModule} from './../src/app.module';
+import {
+    FileSystemFileCreator,
+    SupertestFileDownloader,
+    SupertestFileUploader, TestFile,
+    TestFilesDirectory
+} from "@elense/file-tester";
+import supertest from "supertest";
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication;
+    let app: INestApplication;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    beforeEach(async () => {
+        const moduleFixture: TestingModule = await Test.createTestingModule({
+            imports: [AppModule],
+        }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
+        app = moduleFixture.createNestApplication();
+        await app.init();
+    });
 
-  it('/ (GET)', () => {
-    const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files')
+    it('/ (GET)', async () => {
+        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files')
 
-    const fileCreator = new FileSystemFileCreator({
-          headerRow: ["First name", "Last name", "Age", "Type"]
-        }
-    )
+        const fileCreator = new FileSystemFileCreator({
+                headerRow: ["First name", "Last name", "Age", "Type"]
+            }
+        )
 
-    fileCreator.create(genFiles.path('test.xlsx'), [
-        ["John", "Doe", 30, "Admin"],
-        ["Adam", "Smith", 40, "Admin"],
-        ["Rose", "Gatsby", 35, "User"]
-    ])
+        let testFilePath = genFiles.path('test.xlsx');
 
-    const file = fileCreator.readFile(genFiles.path('test.xlsx'))
+        await fileCreator.create(testFilePath, [
+            ["John", "Doe", 30, "Admin"],
+            ["Adam", "Smith", 40, "Admin"],
+            ["Rose", "Gatsby", 35, "User"]
+        ])
 
-    console.table(file)
+        const file = fileCreator.readFile(testFilePath)
+        console.table(file)
 
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
+
+        const fileUploader = new SupertestFileUploader({
+            appOrBaseUrl: app.getHttpServer(),
+            endpointUrl: "/upload"
+        })
+
+        const uploadedFile = await fileUploader.upload(testFilePath)
+
+        const fileDownloader = new SupertestFileDownloader({
+            appOrBaseUrl: app.getHttpServer(),
+            endpointUrl: "/download",
+        })
+
+        const donwloadedBuffer = await fileDownloader.download({
+            customizeRequest(request: supertest.Test, downloadParameters: any): supertest.Test {
+                return request.query({
+                    fileId: uploadedFile.responseBody.fileId
+                });
+            }
+        })
+
+        const downloadedFile = TestFile.get(donwloadedBuffer)
+
+        expect(downloadedFile).toBeDefined()
+    });
 });
