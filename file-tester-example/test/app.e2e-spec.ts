@@ -8,6 +8,20 @@ import {
     TestFilesDirectory
 } from "@elense/file-tester";
 import supertest from "supertest";
+import * as fs from "node:fs";
+
+export const describeWithFolder = (name: string, basePath: string, folderName: string, tests: (directory: TestFilesDirectory) => void) => {
+    const directory = new TestFilesDirectory(basePath, folderName);
+
+    describe(name, () => {
+        beforeAll(() => {
+            directory.clear()
+            directory.create()
+        });
+
+        tests(directory);
+    });
+};
 
 describe('AppController (e2e)', () => {
     let app: INestApplication;
@@ -21,15 +35,46 @@ describe('AppController (e2e)', () => {
         await app.init();
     });
 
-    it('/ (GET)', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files')
+    describeWithFolder('FileSystemFileCreator', __dirname, 'file-system-file-creator', (directory: TestFilesDirectory) => {
+        it('Directory creation works properly', async () => {
+            expect(fs.existsSync(directory.directory)).toBe(true)
+        });
+    })
+
+    it('Directory creation works properly', async () => {
+        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-1')
+
+        expect(fs.existsSync(genFiles.directory)).toBe(true)
+    });
+
+    it('File creation works properly', async () => {
+        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-2')
 
         const fileCreator = new FileSystemFileCreator({
                 headerRow: ["First name", "Last name", "Age", "Type"]
             }
         )
 
-        let testFilePath = genFiles.path('test.xlsx');
+        const testFilePath = genFiles.path('test.csv');
+
+        await fileCreator.create(testFilePath, [
+            ["John", "Doe", 30, "Admin"],
+            ["Adam", "Smith", 40, "Admin"],
+            ["Rose", "Gatsby", 35, "User"]
+        ])
+
+        expect(fs.existsSync(testFilePath)).toBe(true)
+    });
+
+    it('File upload and download equals the same file content', async () => {
+        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-3')
+
+        const fileCreator = new FileSystemFileCreator({
+                headerRow: ["First name", "Last name", "Age", "Type"]
+            }
+        )
+
+        let testFilePath = genFiles.path('test.csv');
 
         await fileCreator.create(testFilePath, [
             ["John", "Doe", 30, "Admin"],
@@ -39,7 +84,6 @@ describe('AppController (e2e)', () => {
 
         const file = fileCreator.readFile(testFilePath)
         console.table(file)
-
 
         const fileUploader = new SupertestFileUploader({
             appOrBaseUrl: app.getHttpServer(),
@@ -63,6 +107,6 @@ describe('AppController (e2e)', () => {
 
         const downloadedFile = TestFile.get(donwloadedBuffer)
 
-        expect(downloadedFile).toBeDefined()
+        expect(file).toEqual(downloadedFile.jsonData)
     });
 });

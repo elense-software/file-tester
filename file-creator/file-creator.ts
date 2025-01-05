@@ -15,8 +15,12 @@ export interface FileCreator {
 
 export class TestFilesDirectory {
     readonly directory: string
-    constructor(readonly basePath: string, readonly folder: string) {
-        this.directory = path.resolve(this.basePath, this.folder)
+    constructor(basePath: string, readonly folder: string) {
+        this.directory = path.resolve(basePath, this.folder)
+    }
+
+    create(): void {
+        fs.mkdirSync(this.directory, {recursive: true})
     }
 
     clear(): void {
