@@ -1,7 +1,8 @@
 import fs from 'fs'
 import {FileSystemFileCreator} from "./file-system-file-creator";
-import {SpreadsheetTypes, TestFilesDirectory} from "../file-creator";
+import {SpreadsheetTypes} from "../file-creator";
 import {TestFile} from "./test-file";
+import {TestFilesDirectory} from "../test-files-directory";
 
 describe('FileSystemFileCreator', () => {
     let fileCreator: FileSystemFileCreator

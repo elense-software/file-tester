@@ -1,7 +1,7 @@
 import {SpreadsheetTestFile} from "./spreadsheet-test-file";
-import fs from 'fs';
 import path from "path";
-import {TestFilesDirectory} from "../file-creator";
+
+import {TestFilesDirectory} from "../test-files-directory";
 
 describe('SpreadsheetTestFile', () => {
     const bufferData = Buffer.from('some buffer data');
