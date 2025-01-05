@@ -2,7 +2,7 @@ import {Test, TestingModule} from '@nestjs/testing';
 import {INestApplication} from '@nestjs/common';
 import {AppModule} from './../src/app.module';
 import {
-    FileSystemFileCreator,
+    FileSystemFileCreator, SpreadsheetTestFile,
     SupertestFileDownloader,
     SupertestFileUploader, TestFile,
     TestFilesDirectory
@@ -36,57 +36,75 @@ describe('AppController (e2e)', () => {
     });
 
     describeWithFolder('FileSystemFileCreator', __dirname, 'file-system-file-creator', (directory: TestFilesDirectory) => {
-        it('Directory creation works properly', async () => {
-            expect(directory.directory).toEqual(__dirname + '/file-system-file-creator')
-            expect(fs.existsSync(directory.directory)).toBe(true)
-        });
+        describe.each([
+            'csv',
+            'xlsx'
+        ])(`SupertestFileUploader and SupertestFileDownloader (%s)`, (fileType: string) => {
+            it('Standalone file creation works properly %s', async () => {
+                const testFilePath = directory.path(`test.${fileType}`);
+
+                const file: SpreadsheetTestFile = new SpreadsheetTestFile(
+                    [
+                        ["First name", "Last name", "Age", "Type"],
+                        ["John", "Doe", 30, "Admin"],
+                        ["Adam", "Smith", 40, "Admin"],
+                        ["Rose", "Gatsby", 35, "User"]
+                    ],
+                    null
+                )
+
+                file.write(testFilePath)
+
+                expect(fs.existsSync(testFilePath)).toBe(true)
+
+                const writtenFile = SpreadsheetTestFile.get(testFilePath)
+
+                expect(writtenFile.data).toEqual(file.data)
+            });
+        })
     })
 
     it('Directory creation works properly', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-1')
-        genFiles.clear()
-        genFiles.create()
 
+        genFiles.clear()
+        expect(fs.existsSync(genFiles.directory)).toBe(false)
+
+        genFiles.create()
         expect(fs.existsSync(genFiles.directory)).toBe(true)
     });
 
     it('File creation works properly', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-2')
-
-        const fileCreator = new FileSystemFileCreator({
-                headerRow: ["First name", "Last name", "Age", "Type"]
-            }
-        )
-
         const testFilePath = genFiles.path('test.csv');
 
-        await fileCreator.create(testFilePath, [
+        const fileCreator = new FileSystemFileCreator()
+
+        const file: TestFile = await fileCreator.create(testFilePath, [
+            ["First name", "Last name", "Age", "Type"],
             ["John", "Doe", 30, "Admin"],
             ["Adam", "Smith", 40, "Admin"],
             ["Rose", "Gatsby", 35, "User"]
         ])
 
-        expect(fs.existsSync(testFilePath)).toBe(true)
+        expect(fs.existsSync(file.path)).toBe(true)
     });
 
     it('File upload and download equals the same file content', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-3')
+        const testFilePath = genFiles.path('test.csv');
 
-        const fileCreator = new FileSystemFileCreator({
-                headerRow: ["First name", "Last name", "Age", "Type"]
-            }
-        )
-
-        let testFilePath = genFiles.path('test.csv');
+        const fileCreator = new FileSystemFileCreator()
 
         const createdFile = await fileCreator.create(testFilePath, [
+            ["First name", "Last name", "Age", "Type"],
             ["John", "Doe", 30, "Admin"],
             ["Adam", "Smith", 40, "Admin"],
             ["Rose", "Gatsby", 35, "User"]
         ])
 
-        const file = fileCreator.readFile(testFilePath)
-        console.table(file.data)
+        const file = fileCreator.readFile(createdFile.path)
+        file.print()
 
         const fileUploader = new SupertestFileUploader({
             appOrBaseUrl: app.getHttpServer(),
@@ -107,7 +125,6 @@ describe('AppController (e2e)', () => {
                 });
             }
         })
-
 
         expect(file.data).toEqual(downloadedFile.data)
     });

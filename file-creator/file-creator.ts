@@ -15,9 +15,11 @@ export interface FileCreator {
 }
 
 export class TestFilesDirectory {
+    static globalDirectoryPathComponent = '_test-runtime'
+
     readonly directory: string
     constructor(basePath: string, readonly folder: string) {
-        this.directory = path.resolve(basePath, this.folder)
+        this.directory = path.resolve(basePath, TestFilesDirectory.globalDirectoryPathComponent, this.folder)
     }
 
     create(): void {

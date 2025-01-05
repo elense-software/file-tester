@@ -10,4 +10,8 @@ export interface TestFile<T = FileData> {
      * Path to the file. If the file was created in memory, this will be null.
      */
     path: string | null
+
+    write(outputPath: string): void
+
+    print(): void
 }

@@ -2,7 +2,6 @@ import {FileData, TestFile} from "./test-file";
 import fs from "fs";
 import * as XLSX from "xlsx";
 import {dirname, extname} from "path";
-import {HeaderRow} from "./file-system-file-creator";
 
 export type SpreadsheetFileData = any[][]
 
@@ -34,16 +33,12 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
         return new SpreadsheetTestFile(jsonData, filePath)
     }
 
-    write(outputPath: string, headerRow: HeaderRow = null): void {
+    write(outputPath: string): void {
         this.createOutputFolder(outputPath)
 
         const wb = XLSX.utils.book_new()
 
         let fileDataWithHeader: SpreadsheetFileData = [...this.data]
-
-        if (headerRow && Array.isArray(headerRow)) {
-            fileDataWithHeader = [headerRow, ...this.data]
-        }
 
         const ws = XLSX.utils.aoa_to_sheet(fileDataWithHeader)
 
@@ -56,6 +51,10 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
         } else {
             XLSX.writeFileXLSX(wb, outputPath)
         }
+    }
+
+    print() {
+        console.table(this.data)
     }
 
     private createOutputFolder(finalFilePath: string) {

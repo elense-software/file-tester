@@ -1,16 +1,14 @@
-import {dirname} from 'path'
-import fs from 'fs'
-import {FileCreator, FileCreatorConfiguration} from "../file-creator";
+import {FileCreator} from "../file-creator";
 import {FileData, TestFile} from "./test-file";
 import {SpreadsheetTestFile} from "./spreadsheet-test-file";
 
 export type HeaderRow = string[] | null
 
 export class FileSystemFileCreator implements FileCreator {
-    constructor(readonly configuration: FileCreatorConfiguration) {}
+    constructor() {}
 
     async create(filePath: string, fileData: FileData): Promise<TestFile> {
-        this.writeFile(fileData, filePath, this.configuration.headerRow)
+        this.writeFile(fileData, filePath)
         return this.readFile(filePath)
     }
 
@@ -18,12 +16,12 @@ export class FileSystemFileCreator implements FileCreator {
         return SpreadsheetTestFile.get(filePath)
     }
 
-    private writeFile(fileData: FileData, filePath: string, headerRow?: HeaderRow) {
+    private writeFile(fileData: FileData, filePath: string) {
         const file = new SpreadsheetTestFile(
             fileData,
             filePath
         )
 
-        file.write(filePath, headerRow)
+        file.write(filePath)
     }
 }

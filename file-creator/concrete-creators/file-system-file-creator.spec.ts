@@ -17,9 +17,7 @@ describe('FileSystemFileCreator', () => {
             beforeAll(() => {
                 testOutputPath.clear()
 
-                fileCreator = new FileSystemFileCreator({
-                    headerRow: ['Name', 'Last name', 'Age'],
-                })
+                fileCreator = new FileSystemFileCreator()
             })
 
             it('creates output folder if it does not exist', async () => {
@@ -34,33 +32,32 @@ describe('FileSystemFileCreator', () => {
 
             it('writes file with header row if provided', async () => {
                 const filePath = testOutputPath.path( `test-name-lastname-age.${extension}`)
-                const fileData = [['Radek', 'Landowski', 20]]
-                const headerRow = ['Name', 'Last name', 'Age']
+                const fileData = [
+                    ['Name', 'Last name', 'Age'],
+                    ['Radek', 'Landowski', 20]
+                ]
 
                 const result: TestFile = await fileCreator.create(filePath, fileData)
 
-                expect(result.data).toEqual([headerRow, ...fileData])
+                expect(result.data).toEqual(fileData)
             })
 
             it('writes file without header', async () => {
                 const filePath = testOutputPath.path( `test-radek-landowski-20-no-header.${extension}`)
                 const fileData = [['Radek', 'Landowski', 20]]
 
-                const result: TestFile = await new FileSystemFileCreator({
-                    headerRow: null,
-                }).create(filePath, fileData)
+                const result: TestFile = await new FileSystemFileCreator().create(filePath, fileData)
 
                 expect(result.data).toEqual(fileData)
             })
 
             it('writes file with header row even when data is empty', async () => {
                 const filePath = testOutputPath.path(`test-name-lastname-age-no-data.${extension}`)
-                const fileData = [[]]
-                const headerRow = ['Name', 'Last name', 'Age']
+                const fileData = [['Name', 'Last name', 'Age']]
 
                 const result: TestFile = await fileCreator.create(filePath, fileData)
 
-                expect(result.data).toEqual([headerRow])
+                expect(result.data).toEqual(fileData)
             })
         })
     }
