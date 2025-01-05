@@ -65,13 +65,26 @@ describe('AppController (e2e)', () => {
     })
 
     it('Directory creation works properly', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-1')
+        const genFiles = new TestFilesDirectory(__dirname, 'test-specific-folder')
 
         genFiles.clear()
         expect(fs.existsSync(genFiles.directory)).toBe(false)
 
         genFiles.create()
         expect(fs.existsSync(genFiles.directory)).toBe(true)
+        expect(genFiles.directory.endsWith('test-specific-folder')).toBe(true)
+    });
+
+    it('Directory contains the global path component', async () => {
+        const folder = new TestFilesDirectory(__dirname, 'test-specific-folder')
+        // folder.directory is an absolute path: /Users/radek/Documents/repos/file-tester/file-tester-example/test/_test-runtime/test-specific-folder
+
+        folder.clear()
+        folder.create()
+
+        fs.writeFileSync(folder.path('test.txt'), 'test')
+
+        expect(folder.directory.endsWith(`_test-runtime/test-specific-folder`)).toBe(true)
     });
 
     it('File creation works properly', async () => {
