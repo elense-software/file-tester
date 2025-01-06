@@ -1,13 +1,12 @@
-import {FileData, TestFile} from "./test-file";
+import {FileSpecs, TestFile} from "./test-file";
 import fs from "fs";
 import * as XLSX from "xlsx";
 import {dirname, extname} from "path";
 
 export type SpreadsheetFileData = any[][]
-export type MyFileData = [string, string, number][]
 
-export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFileData> implements TestFile<T> {
-    static get<T extends SpreadsheetFileData>(path: string | Buffer): SpreadsheetTestFile<T> {
+export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFileData, R extends string[] = string[]> implements TestFile<T> {
+    static get<T extends SpreadsheetFileData, R extends string[] = string[]>(path: string | Buffer, fileSpecs?: FileSpecs<R>): SpreadsheetTestFile<T> {
         let fileBuffer: Buffer
 
         let filePath: string | null = null
@@ -31,21 +30,39 @@ export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFile
             defval: null,
         }) as T
 
-        return new SpreadsheetTestFile<T>(jsonData, filePath)
+        return new SpreadsheetTestFile<T>(jsonData, filePath, fileSpecs)
     }
 
-    static write<T extends SpreadsheetFileData = SpreadsheetFileData>(fileData: T, filePath: string): SpreadsheetTestFile {
+    private validateFileSpecs(fileSpecs: FileSpecs<R>, jsonData: SpreadsheetFileData) {
+        const header = fileSpecs.header
+        if (jsonData[0].length != header.length) {
+            throw new Error(`Invalid data length. Expected ${header.length}, got ${jsonData[0].length}`)
+        }
+
+        if (jsonData[0].join(',') !== header.join(',')) {
+            throw new Error(`Invalid header. Expected header: ${header.join()}, got: ${jsonData[0].join()}`)
+        }
+    }
+
+    static write<T extends SpreadsheetFileData = SpreadsheetFileData, R extends string[] = string[]>(fileData: T, filePath: string, fileSpecs?: FileSpecs<R>): SpreadsheetTestFile<T> {
         const file = new SpreadsheetTestFile(
             fileData,
-            filePath
+            filePath,
+            fileSpecs
         )
 
-        file.write(filePath)
+        file.write(filePath, fileSpecs)
 
         return file
     }
 
-    write(outputPath: string): void {
+    write(outputPath: string, fileSpecs?: FileSpecs<R>): void {
+        if (fileSpecs) {
+            this.validateFileSpecs(fileSpecs, this.data);
+        }
+
+        this.path = outputPath
+
         this.createOutputFolder(outputPath)
 
         const wb = XLSX.utils.book_new()
@@ -63,8 +80,6 @@ export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFile
         } else {
             XLSX.writeFileXLSX(wb, outputPath)
         }
-
-        this.path = outputPath
     }
 
     print() {
@@ -78,6 +93,11 @@ export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFile
 
     constructor(
         readonly data: T,
-        public path: string | null = null) {
+        public path: string | null = null,
+        readonly fileSpecs?: FileSpecs<R>) {
+
+        if (fileSpecs) {
+            this.validateFileSpecs(fileSpecs, data);
+        }
     }
 }

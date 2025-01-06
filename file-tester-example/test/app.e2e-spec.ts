@@ -9,6 +9,7 @@ import {
 } from "@elense/file-tester";
 import supertest from "supertest";
 import * as fs from "node:fs";
+import {FileSpecs} from "../../file-creator/concrete-creators/test-file";
 
 export const describeWithFolder = (name: string, basePath: string, folderName: string, tests: (directory: TestFilesDirectory) => void) => {
     const directory = new TestFilesDirectory(basePath, folderName);
@@ -131,6 +132,34 @@ describe('AppController (e2e)', () => {
         expect(fs.existsSync(file.path)).toBe(true)
     });
 
+    it('File creation with specs works properly', async () => {
+        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-2')
+        const testFilePath = genFiles.path('test.csv');
+
+
+        type PeopleFileHeader = [string, string, string, string]
+        type PeopleFileData = [string, string, number, string]
+
+        type PeopleRegistryFileData = [
+            PeopleFileHeader,
+            ...PeopleFileData[]
+        ]
+
+        class PeopleRegistryFile implements FileSpecs<PeopleFileHeader> {
+            readonly header: PeopleFileHeader = ['First name', 'Last name', 'Age', 'Type']
+        }
+
+        const inputFile: SpreadsheetTestFile = new SpreadsheetTestFile(
+            [
+                ["First name", "Last name", "Age", "Type"],
+                ["John", "Doe", 30, "Admin"],
+                ["Adam", "Smith", 40, "Admin"],
+                ["Rose", "Gatsby", 35, "User"]
+            ],
+            null, new PeopleRegistryFile()
+        )
+    });
+
     it('File creation and upload works properly', async () => {
         const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-23')
         const testFilePath = genFiles.path('test-23.csv');
@@ -157,10 +186,14 @@ describe('AppController (e2e)', () => {
         it('Created file and downloaded one must have the same content', async () => {
             const testFilePath = directory.path('test.csv');
 
+            type PeopleFileHeader = [string, string, string, string]
+            type PeopleFileData = [string, string, number, string]
+
             type PeopleRegistryFileData = [
-                [string, string, string, string],
-                ...[string, string, number, string][]
+                PeopleFileHeader,
+                ...PeopleFileData[]
             ]
+
             // write the file to local file system
             const createdFile: SpreadsheetTestFile = SpreadsheetTestFile.write<PeopleRegistryFileData>([
                 ["First name", "Last name", "Age", "Type"],
@@ -168,6 +201,8 @@ describe('AppController (e2e)', () => {
                 ["Adam", "Smith", 40, "Admin"],
                 ["Rose", "Gatsby", 35, "User"]
             ], testFilePath)
+
+            const arrayOfFiles: SpreadsheetTestFile<PeopleRegistryFileData>[] = []
 
             // prepare uploader with common props (can be overriden at upload method)
             const fileUploader = new SupertestFileUploader({

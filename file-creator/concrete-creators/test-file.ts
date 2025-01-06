@@ -1,5 +1,9 @@
 export type FileData = any[][];
 
+export interface FileSpecs<T extends string[] = string[]> {
+    header: T
+}
+
 export interface TestFile<T = FileData> {
     /**
      * Data from the file.
