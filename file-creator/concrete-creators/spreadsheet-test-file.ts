@@ -4,9 +4,10 @@ import * as XLSX from "xlsx";
 import {dirname, extname} from "path";
 
 export type SpreadsheetFileData = any[][]
+export type MyFileData = [string, string, number][]
 
-export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
-    static get(path: string | Buffer): SpreadsheetTestFile {
+export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFileData> implements TestFile<T> {
+    static get<T extends SpreadsheetFileData>(path: string | Buffer): SpreadsheetTestFile<T> {
         let fileBuffer: Buffer
 
         let filePath: string | null = null
@@ -22,18 +23,18 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
         const firstSheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[firstSheetName]
 
-        const jsonData: FileData = XLSX.utils.sheet_to_json(worksheet, {
+        const jsonData: T = XLSX.utils.sheet_to_json(worksheet, {
             header: 1,
             raw: false,
             rawNumbers: true,
             blankrows: false,
             defval: null,
-        })
+        }) as T
 
-        return new SpreadsheetTestFile(jsonData, filePath)
+        return new SpreadsheetTestFile<T>(jsonData, filePath)
     }
 
-    static write(fileData: SpreadsheetFileData, filePath: string): SpreadsheetTestFile {
+    static write<T extends SpreadsheetFileData = SpreadsheetFileData>(fileData: T, filePath: string): SpreadsheetTestFile {
         const file = new SpreadsheetTestFile(
             fileData,
             filePath
@@ -76,7 +77,7 @@ export class SpreadsheetTestFile implements TestFile<SpreadsheetFileData> {
     }
 
     constructor(
-        readonly data: SpreadsheetFileData,
+        readonly data: T,
         public path: string | null = null) {
     }
 }

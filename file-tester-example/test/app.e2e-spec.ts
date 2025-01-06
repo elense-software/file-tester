@@ -157,8 +157,12 @@ describe('AppController (e2e)', () => {
         it('Created file and downloaded one must have the same content', async () => {
             const testFilePath = directory.path('test.csv');
 
+            type PeopleRegistryFileData = [
+                [string, string, string, string],
+                ...[string, string, number, string][]
+            ]
             // write the file to local file system
-            const createdFile: SpreadsheetTestFile = SpreadsheetTestFile.write([
+            const createdFile: SpreadsheetTestFile = SpreadsheetTestFile.write<PeopleRegistryFileData>([
                 ["First name", "Last name", "Age", "Type"],
                 ["John", "Doe", 30, "Admin"],
                 ["Adam", "Smith", 40, "Admin"],

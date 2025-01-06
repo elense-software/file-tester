@@ -13,6 +13,20 @@ describe('SpreadsheetTestFile', () => {
         expect(instance.path).toBe(filePath);
     });
 
+    it('creates an instance of specific type from a file path', () => {
+        const file = new TestFilesDirectory(__dirname, 'generated-files').path('generated-file-2.xlsx');
+
+        type PeopleRegistryFileData = [string, string, string][]
+
+        let fileData: PeopleRegistryFileData = [['Name', 'Last name', 'Age']];
+        const instance = new SpreadsheetTestFile(fileData);
+        instance.write(file);
+
+        expect(instance).toBeInstanceOf(SpreadsheetTestFile);
+        expect(instance.path).toEqual(file);
+    });
+
+
     it('creates an instance from a buffer', () => {
         const instance = SpreadsheetTestFile.get(bufferData);
         expect(instance).toBeInstanceOf(SpreadsheetTestFile);
