@@ -192,8 +192,6 @@ describe('AppController (e2e)', () => {
             // compare that the content of created file and downloaded file is the same
             expect(createdFile.data).toEqual(downloadedFile.data)
         });
-
-
     })
 
 });
