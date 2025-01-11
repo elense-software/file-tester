@@ -23,7 +23,7 @@ describe('Your test using ./static-test-files/test-file.txt file as input', () =
 ### RuntimeTestFilesDirectory
 A wrapper for directory for reading and writing runtime file which are not meant to be commited. 
 - By default, it creates a relative directory `runtime-test-files`. 
-- Add '**/runtime-test-files' to your project's root .gitignore.
+- Add `**/runtime-test-files` to your project's root .gitignore.
 ```typescript
 describe('Your test which generates files dynamically in runtime', () => {
     const runtimeTestDir: RuntimeTestFilesDirectory = new RuntimeTestFilesDirectory(__dirname);
