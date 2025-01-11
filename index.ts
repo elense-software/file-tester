@@ -14,3 +14,5 @@ export {TestFile} from "./file-creator/concrete-creators/test-file";
 export {FileData} from "./file-creator/concrete-creators/test-file";
 export {SpreadsheetTestFile} from "./file-creator/concrete-creators/spreadsheet-test-file";
 export {TestFilesDirectory} from "./file-creator/test-files-directory";
+export {StaticTestFilesDirectory} from "./file-creator/static-test-files-directory";
+export {RuntimeTestFilesDirectory} from "./file-creator/runtime-test-files-directory";

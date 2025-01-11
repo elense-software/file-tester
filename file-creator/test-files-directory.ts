@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, {PathOrFileDescriptor, WriteFileOptions} from "fs";
 import * as path from 'path'
 
 export class TestFilesDirectory {
@@ -17,6 +17,25 @@ export class TestFilesDirectory {
 
     constructor(basePath: string, folder: string = TestFilesDirectory.defaultFolderName) {
         this.directory = path.resolve(basePath, folder)
+    }
+
+    reset(): void {
+        this.clear()
+        this.create()
+    }
+
+    readFile(filePath: string, options: | {
+        encoding: BufferEncoding;
+        flag?: string | undefined;
+    } | BufferEncoding): string {
+        return fs.readFileSync(this.path(filePath), options)
+    }
+
+    writeFile(file: string,
+              data: string | NodeJS.ArrayBufferView,
+              options?: WriteFileOptions,
+    ): void {
+        fs.writeFileSync(this.path(file), data, options)
     }
 
     create(): void {
