@@ -1,7 +1,7 @@
 ### StaticTestFilesDirectory 
 
-A convention to manage static files meant to be commited to repo, like example user inputs etc.
-By default it operates on provided base path and 'static-files-directory'.
+A wrapper for directory with static files like example user inputs etc.
+By default it operates on 'static-files-directory' folder relative to __dirname.
 If used across repo it makes a coherent way to manage static files.
 ```typescript
 describe('Your test using ./static-test-files/test-file.txt file as input', () => {
@@ -21,7 +21,9 @@ describe('Your test using ./static-test-files/test-file.txt file as input', () =
 });
 ```
 ### RuntimeTestFilesDirectory
-A wrapper for a specified directory for reading and writing files. By default, it creates a directory named `runtime-test-files` in the specified base directory. By adding '**/runtime-test-files' to .gitignore you provide clean and coherent way to manage generated files which are not supposed to be commited.
+A wrapper for directory for reading and writing runtime file which are not meant to be commited. 
+- By default, it creates a relative directory `runtime-test-files`. 
+- Add '**/runtime-test-files' to your project's root .gitignore.
 ```typescript
 describe('Your test which generates files dynamically in runtime', () => {
     const runtimeTestDir: RuntimeTestFilesDirectory = new RuntimeTestFilesDirectory(__dirname);
