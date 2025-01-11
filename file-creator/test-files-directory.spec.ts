@@ -68,17 +68,17 @@ describe('TestFilesDirectory', () => {
 
     it('Load static file, save updated and assert on', () => {
         const staticDir: StaticTestFilesDirectory = new StaticTestFilesDirectory(__dirname)
-        const testSentenceFile = staticDir.readFile('test-sentence.txt', 'utf8')
+        const testSentenceFile = staticDir.readFile('test-file.txt', 'utf8')
 
-        expect(testSentenceFile).toEqual("This is a test sentence.")
+        expect(testSentenceFile).toEqual("Static test file.")
 
         const updatedFileContent = testSentenceFile + " Updated!"
 
         const runtimeDir: RuntimeTestFilesDirectory = new RuntimeTestFilesDirectory(__dirname)
-        runtimeDir.writeFile('test-sentence-updated.txt', updatedFileContent)
+        runtimeDir.writeFile('test-file-updated.txt', updatedFileContent)
 
-        const updatedFile = runtimeDir.readFile('test-sentence-updated.txt', 'utf8')
-        expect(updatedFile).toBe('This is a test sentence. Updated!');
+        const updatedFile = runtimeDir.readFile('test-file-updated.txt', 'utf8')
+        expect(updatedFile).toBe('Static test file. Updated!');
     });
 
     it('returns the correct path for a file', () => {
