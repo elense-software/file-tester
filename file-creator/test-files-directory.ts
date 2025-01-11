@@ -2,12 +2,21 @@ import fs from "fs";
 import * as path from 'path'
 
 export class TestFilesDirectory {
-    static globalDirectoryPathComponent = '_test-runtime'
+    static defaultFolderName = 'test-files'
+
+    static async runInDirectory(
+        basePath: string,
+        folder: string = TestFilesDirectory.defaultFolderName,
+        callback: (dir: TestFilesDirectory) => Promise<void>) {
+        const testDirectory = new TestFilesDirectory(basePath, folder)
+
+        await callback(testDirectory)
+    }
 
     readonly directory: string
 
-    constructor(basePath: string, readonly folder: string) {
-        this.directory = path.resolve(basePath, TestFilesDirectory.globalDirectoryPathComponent, this.folder)
+    constructor(basePath: string, folder: string = TestFilesDirectory.defaultFolderName) {
+        this.directory = path.resolve(basePath, folder)
     }
 
     create(): void {
@@ -20,7 +29,19 @@ export class TestFilesDirectory {
         }
     }
 
-    path(filePath: string) {
-        return path.resolve(this.directory, filePath)
+    path(filePath: string, filePathTransformationStrategy: FilePathGenerationStrategy = new ExactFilePathGenerationStrategy()): string {
+        const finalFilePath: string = filePathTransformationStrategy.generate(filePath)
+
+        return path.resolve(this.directory, finalFilePath)
+    }
+}
+
+export interface FilePathGenerationStrategy {
+    generate(filePath: string): string
+}
+
+export class ExactFilePathGenerationStrategy implements FilePathGenerationStrategy {
+    generate(filePath: string): string {
+        return filePath
     }
 }

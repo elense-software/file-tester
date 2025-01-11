@@ -5,8 +5,8 @@ import {dirname, extname} from "path";
 
 export type SpreadsheetFileData = any[][]
 
-export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFileData, R extends string[] = string[]> implements TestFile<T> {
-    static get<T extends SpreadsheetFileData, R extends string[] = string[]>(path: string | Buffer, fileSpecs?: FileSpecs<R>): SpreadsheetTestFile<T> {
+export class SpreadsheetTestFile<FILE extends SpreadsheetFileData = SpreadsheetFileData, HEADER extends string[] = string[]> implements TestFile<FILE> {
+    static get<FILE extends SpreadsheetFileData, HEADER extends string[] = string[]>(path: string | Buffer, fileSpecs?: FileSpecs<HEADER>): SpreadsheetTestFile<FILE> {
         let fileBuffer: Buffer
 
         let filePath: string | null = null
@@ -22,29 +22,18 @@ export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFile
         const firstSheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[firstSheetName]
 
-        const jsonData: T = XLSX.utils.sheet_to_json(worksheet, {
+        const jsonData: FILE = XLSX.utils.sheet_to_json(worksheet, {
             header: 1,
             raw: false,
             rawNumbers: true,
             blankrows: false,
             defval: null,
-        }) as T
+        }) as FILE
 
-        return new SpreadsheetTestFile<T>(jsonData, filePath, fileSpecs)
+        return new SpreadsheetTestFile<FILE>(jsonData, filePath, fileSpecs)
     }
 
-    private validateFileSpecs(fileSpecs: FileSpecs<R>, jsonData: SpreadsheetFileData) {
-        const header = fileSpecs.header
-        if (jsonData[0].length != header.length) {
-            throw new Error(`Invalid data length. Expected ${header.length}, got ${jsonData[0].length}`)
-        }
-
-        if (jsonData[0].join(',') !== header.join(',')) {
-            throw new Error(`Invalid header. Expected header: ${header.join()}, got: ${jsonData[0].join()}`)
-        }
-    }
-
-    static write<T extends SpreadsheetFileData = SpreadsheetFileData, R extends string[] = string[]>(fileData: T, filePath: string, fileSpecs?: FileSpecs<R>): SpreadsheetTestFile<T> {
+    static write<FILE extends SpreadsheetFileData = SpreadsheetFileData, HEADER extends string[] = string[]>(fileData: FILE, filePath: string, fileSpecs?: FileSpecs<HEADER>): SpreadsheetTestFile<FILE> {
         const file = new SpreadsheetTestFile(
             fileData,
             filePath,
@@ -56,7 +45,17 @@ export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFile
         return file
     }
 
-    write(outputPath: string, fileSpecs?: FileSpecs<R>): void {
+    constructor(
+        readonly data: FILE,
+        public path: string | null = null,
+        readonly fileSpecs?: FileSpecs<HEADER>) {
+
+        if (fileSpecs) {
+            this.validateFileSpecs(fileSpecs, data);
+        }
+    }
+
+    write(outputPath: string, fileSpecs?: FileSpecs<HEADER>): void {
         if (fileSpecs) {
             this.validateFileSpecs(fileSpecs, this.data);
         }
@@ -87,17 +86,18 @@ export class SpreadsheetTestFile<T extends SpreadsheetFileData = SpreadsheetFile
     }
 
     private createOutputFolder(finalFilePath: string) {
-        const dirPath = dirname(finalFilePath)
+        const dirPath: string = dirname(finalFilePath)
         fs.mkdirSync(dirPath, { recursive: true })
     }
 
-    constructor(
-        readonly data: T,
-        public path: string | null = null,
-        readonly fileSpecs?: FileSpecs<R>) {
+    private validateFileSpecs(fileSpecs: FileSpecs<HEADER>, jsonData: SpreadsheetFileData) {
+        const header: HEADER = fileSpecs.header
+        if (jsonData[0].length != header.length) {
+            throw new Error(`Invalid data length. Expected ${header.length}, got ${jsonData[0].length}`)
+        }
 
-        if (fileSpecs) {
-            this.validateFileSpecs(fileSpecs, data);
+        if (jsonData[0].join(',') !== header.join(',')) {
+            throw new Error(`Invalid header. Expected header: ${header.join()}, got: ${jsonData[0].join()}`)
         }
     }
 }

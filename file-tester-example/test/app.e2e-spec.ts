@@ -36,7 +36,8 @@ describe('AppController (e2e)', () => {
         await app.init();
     });
 
-    describeWithFolder('FileSystemFileCreator', __dirname, 'file-system-file-creator', (directory: TestFilesDirectory) => {
+    let testBasePath = `${__dirname}/${TestFilesDirectory.defaultFolderName}`
+    describeWithFolder('FileSystemFileCreator', testBasePath, 'file-system-file-creator', (directory: TestFilesDirectory) => {
         describe.each([
             'csv',
             'xlsx'
@@ -84,17 +85,17 @@ describe('AppController (e2e)', () => {
         const lastNameOfAdam = inputFile.data[2][1]
 
         // write to local file system
-        inputFile.write( __dirname + '/test.xlsx')
+        inputFile.write( testBasePath + '/test.xlsx')
 
         // Fetch file by path
-        const writtenFile: SpreadsheetTestFile = SpreadsheetTestFile.get(__dirname + '/test.xlsx')
+        const writtenFile: SpreadsheetTestFile = SpreadsheetTestFile.get(testBasePath + '/test.xlsx')
 
         // compare files
         expect(writtenFile.data).toEqual(inputFile.data)
     });
 
     it('Directory creation works properly', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'test-specific-folder')
+        const genFiles = new TestFilesDirectory(testBasePath, 'test-specific-folder')
 
         genFiles.clear()
         expect(fs.existsSync(genFiles.directory)).toBe(false)
@@ -105,7 +106,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('Directory contains the global path component', async () => {
-        const folder = new TestFilesDirectory(__dirname, 'test-specific-folder')
+        const folder = new TestFilesDirectory(testBasePath)
         // folder.directory is an absolute path: /Users/radek/Documents/repos/file-tester/file-tester-example/test/_test-runtime/test-specific-folder
 
         folder.clear()
@@ -113,11 +114,11 @@ describe('AppController (e2e)', () => {
 
         fs.writeFileSync(folder.path('test.txt'), 'test')
 
-        expect(folder.directory.endsWith(`_test-runtime/test-specific-folder`)).toBe(true)
+        expect(folder.directory.endsWith(TestFilesDirectory.defaultFolderName)).toBe(true)
     });
 
     it('File creation works properly', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-2')
+        const genFiles = new TestFilesDirectory(testBasePath, 'generated-test-files-2')
         const testFilePath = genFiles.path('test.csv');
 
         const fileCreator = new FileSystemFileCreator()
@@ -133,12 +134,12 @@ describe('AppController (e2e)', () => {
     });
 
     it('File creation with specs works properly', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-2')
+        const genFiles = new TestFilesDirectory(testBasePath, 'generated-test-files-2')
         const testFilePath = genFiles.path('test.csv');
 
 
         type PeopleFileHeader = [string, string, string, string]
-        type PeopleFileData = [string, string, number, string]
+        type PeopleFileData = [string, string, string, string]
 
         type PeopleRegistryFileData = [
             PeopleFileHeader,
@@ -161,7 +162,7 @@ describe('AppController (e2e)', () => {
     });
 
     it('File creation and upload works properly', async () => {
-        const genFiles = new TestFilesDirectory(__dirname, 'generated-test-files-23')
+        const genFiles = new TestFilesDirectory(testBasePath, 'generated-test-files-23')
         const testFilePath = genFiles.path('test-23.csv');
 
         const fileCreator = new FileSystemFileCreator()
@@ -182,7 +183,7 @@ describe('AppController (e2e)', () => {
         expect(response.responseBody.fileId).toBeDefined()
     });
 
-    describeWithFolder(`Create file in folder, upload and download back again.`, __dirname, 'e2e-upload-download', (directory: TestFilesDirectory) => {
+    describeWithFolder(`Create file in folder, upload and download back again.`, testBasePath, 'e2e-upload-download', (directory: TestFilesDirectory) => {
         it('Created file and downloaded one must have the same content', async () => {
             const testFilePath = directory.path('test.csv');
 
@@ -227,6 +228,9 @@ describe('AppController (e2e)', () => {
                     });
                 }
             })
+
+            // write downloaded file to disk
+            downloadedFile.write(directory.path('downloaded-test.csv'))
 
             // compare that the content of created file and downloaded file is the same
             expect(createdFile.data).toEqual(downloadedFile.data)

@@ -3,11 +3,10 @@ import fs from 'fs';
 import path from 'path';
 
 describe('TestFilesDirectory', () => {
-    const folder = 'test-files-directory-spec';
     let testDir: TestFilesDirectory;
 
     beforeEach(() => {
-        testDir = new TestFilesDirectory(__dirname, folder);
+        testDir = new TestFilesDirectory(__dirname);
     });
 
     it('creates the directory successfully', () => {
@@ -23,7 +22,7 @@ describe('TestFilesDirectory', () => {
 
     it('returns the correct path for a file', () => {
         const filePath = 'file.txt';
-        const expectedPath = path.resolve(__dirname, TestFilesDirectory.globalDirectoryPathComponent, folder, filePath);
+        const expectedPath = path.resolve(__dirname, 'test-files', filePath);
         expect(testDir.path(filePath)).toBe(expectedPath);
     });
 
@@ -42,7 +41,7 @@ describe('TestFilesDirectory', () => {
     });
 
     it('handles multilevel directory successfully', () => {
-        const nested: TestFilesDirectory = new TestFilesDirectory(testDir.directory, 'nested/subnested');
+        const nested: TestFilesDirectory = new TestFilesDirectory(testDir.directory, `${TestFilesDirectory.defaultFolderName}/nested/subnested`);
         nested.create()
 
         expect(fs.existsSync(nested.directory)).toBe(true);
@@ -50,7 +49,7 @@ describe('TestFilesDirectory', () => {
 
     it('handles multilevel directory successfully', () => {
         testDir.create()
-        const nested: TestFilesDirectory = new TestFilesDirectory(testDir.directory, 'branched/nested');
+        const nested: TestFilesDirectory = new TestFilesDirectory(testDir.directory, `${TestFilesDirectory.defaultFolderName}/branched/nested`      );
         nested.create()
 
         expect(fs.existsSync(nested.directory)).toBe(true);

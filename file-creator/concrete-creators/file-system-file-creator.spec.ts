@@ -13,7 +13,7 @@ describe('FileSystemFileCreator', () => {
         const extension: SpreadsheetTypes = extensions[i]
 
         describe(`Extension: ${extension}`, () => {
-            const testOutputPath = new TestFilesDirectory(__dirname, `output-tests-${extension}`)
+            const testOutputPath = new TestFilesDirectory(__dirname, `${TestFilesDirectory.defaultFolderName}/${extension}`)
 
             beforeAll(() => {
                 testOutputPath.clear()

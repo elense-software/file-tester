@@ -1,12 +1,12 @@
 {
   "name": "@elense/file-tester",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Util for less cumbersome api tests with files",
     "scripts": {
     "test": "jest",
     "clean": "rm -rf ./dist",
     "build": "tsup",
-    "pack": "npm run test && npm run build && npm pack && cd file-tester-example && npm run install-file-tester && npm run test:e2e",
+    "pack": "npm run test && npm run build && npm pack && cd file-tester-example && npm install && npm run test:e2e",
     "packDry": "npm pack --dry-run"
   },
   "keywords": [
