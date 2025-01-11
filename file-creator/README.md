@@ -54,7 +54,9 @@ describe('Your test which generates files dynamically in runtime', () => {
 });
 ```
 
-Using both StaticTestFilesDirectory and RuntimeTestFilesDirectory in one test to provide separation between static inputs and runtime outputs.
+### StaticTestFilesDirectory and RuntimeTestFilesDirectory combined
+
+Using both `StaticTestFilesDirectory` and `RuntimeTestFilesDirectory` in one test to provide separation between static inputs and runtime outputs.
 ```typescript
 it('Load ./static-test-files/test-sentence.txt and save updated content in ./runtime-test-files/test.sentence.updated.txt', () => {
     const staticDir: TestFilesDirectory = new StaticTestFilesDirectory(__dirname)
