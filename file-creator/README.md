@@ -1,7 +1,7 @@
 ### StaticTestFilesDirectory 
 
 A wrapper for directory with static files like example user inputs etc.
-By default it operates on 'static-files-directory' folder relative to __dirname.
+- By default it operates on `static-files-directory` folder relative to `__dirname`.
 If used across repo it makes a coherent way to manage static files.
 ```typescript
 describe('Your test using ./static-test-files/test-file.txt file as input', () => {
