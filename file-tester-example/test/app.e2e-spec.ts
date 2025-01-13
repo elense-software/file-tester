@@ -16,8 +16,7 @@ export const describeWithFolder = (name: string, basePath: string, folderName: s
 
     describe(name, () => {
         beforeAll(() => {
-            directory.clear()
-            directory.create()
+            directory.reset()
         });
 
         tests(directory);
@@ -218,6 +217,7 @@ describe('AppController (e2e)', () => {
             const fileDownloader = new SupertestFileDownloader({
                 appOrBaseUrl: app.getHttpServer(),
                 endpointUrl: "/download",
+                factory: SpreadsheetTestFile.get,
             })
 
             // download the file, by executing http request to /download endpoint and using fileId query parameter

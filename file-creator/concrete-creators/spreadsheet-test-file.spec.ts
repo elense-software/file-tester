@@ -9,7 +9,11 @@ describe('SpreadsheetTestFile', () => {
     const bufferData = Buffer.from('some buffer data');
 
     it('creates an instance from a file path', () => {
-        const filePath = new StaticTestFilesDirectory(__dirname).path('test-name-lastname-age.xlsx')
+        const filePath = new StaticTestFilesDirectory(__dirname, StaticTestFilesDirectory.defaultFolderName, (filePath) => {
+            SpreadsheetTestFile.get(filePath, {
+                header: ['Name', 'Last name', 'Age']
+            })
+        }).path('test-name-lastname-age.xlsx')
         const instance = SpreadsheetTestFile.get(filePath);
         expect(instance).toBeInstanceOf(SpreadsheetTestFile);
         expect(instance.path).toBe(filePath);
@@ -125,6 +129,7 @@ describe('SpreadsheetTestFile', () => {
 
         type PeopleRegistryRow = [string, string, string, string]
         type PeopleRegistryFile = [
+            ['First Name', 'Last name', 'Age', "Type"],
             ...PeopleRegistryRow[]
         ]
 

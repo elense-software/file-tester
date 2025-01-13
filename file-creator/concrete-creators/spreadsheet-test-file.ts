@@ -68,7 +68,7 @@ export class SpreadsheetTestFile<FILE extends SpreadsheetFileData = SpreadsheetF
 
         let fileDataWithHeader: SpreadsheetFileData = [...this.data]
 
-        const ws = XLSX.utils.aoa_to_sheet(fileDataWithHeader)
+        const ws = XLSX.utils.aoa_to_sheet(fileDataWithHeader, {sheetStubs: true})
 
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
 

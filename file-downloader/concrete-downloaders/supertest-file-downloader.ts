@@ -5,7 +5,12 @@ import {SpreadsheetTestFile} from "../../file-creator/concrete-creators/spreadsh
 
 export interface SupertestFileDownloaderConfiguration {
     /**
-     * If not specified at SupertestFileUploader creation it must be specified at calling upload method in uploadParameters
+     * If not specified at SupertestFileUploader creation it must be specified at calling upload method in downloadParameters
+     */
+    factory?: (buffer: Buffer) => TestFile
+
+    /**
+     * If not specified at SupertestFileUploader creation it must be specified at calling upload method in downloadParameters
      */
     appOrBaseUrl?: any
 
@@ -40,6 +45,6 @@ export class SupertestFileDownloader implements FileDownloader {
 
         const responseBody: Buffer = await response.body
 
-        return SpreadsheetTestFile.get(responseBody)
+        return mergedConfig.factory(responseBody)
     }
 }
